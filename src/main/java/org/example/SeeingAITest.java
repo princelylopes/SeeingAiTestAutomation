@@ -170,7 +170,7 @@ public class SeeingAITest {
         TouchAction ta = new TouchAction((PerformsTouchActions) driver);
         ta.press(PointOption.point(900, 1200)).waitAction(WaitOptions.waitOptions(Duration.ofMillis(1000))).moveTo(PointOption.point(100, 1200)).release().perform();
         Thread.sleep(1000);
-        System.out.println("swiped to next Image-----------------");
+        System.out.println("swiped to next Image------------------");
     }
 
 }
