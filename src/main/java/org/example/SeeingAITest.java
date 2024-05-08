@@ -13,7 +13,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
+import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -22,6 +22,8 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SeeingAITest {
 	public static AppiumDriver driver;
@@ -44,12 +46,12 @@ public class SeeingAITest {
         caps.setCapability("appPackage", "com.microsoft.seeingai");
         caps.setCapability("appActivity", "crc64a8457ff90b487ee0.SplashActivity");
         
-        List<String> expectedResults = readExpectedResultsFromFile();
+        List<TestCase> testCases = readTestCasesFromFile();
         
         try {
             URL url = new URL("http://127.0.0.1:4723/wd/hub/");
             driver = new AndroidDriver(url, caps);
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
             
             skipButton(wait);
             acceptTerms(wait);
@@ -61,24 +63,28 @@ public class SeeingAITest {
             
             for (int i = 0; i < totalTests; i++) {
                 sharePhoto(wait);
-                String expectedResult = expectedResults.get(i);
-                getResults(wait, expectedResult);
-                compareResults(expectedResult);
+                TestCase testcase = testCases.get(i);
+                getResults(wait, testcase);
+                compareResults(testcase.getResult());
                 goBack(wait);
                 swipeToNextImage();
             }
             
             navigateToHome();
+            writeTestCasesToFile(testCases);
 
         } catch (MalformedURLException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 	}
 	
-	private static void getResults(WebDriverWait wait, String expectedResult) {
+	private static void getResults(WebDriverWait wait, TestCase testcase) {
         WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.id("com.microsoft.seeingai:id/result_cell_text")));
         String actualResult = element.getText();
-        System.out.println("Expected Result: " + expectedResult);
+        testcase.setActualResult(actualResult);
+        System.out.println("TestCase No.: " + testcase.getTest_number() );
+        System.out.println("Scenario: " + testcase.getScenario());
+        System.out.println("Expected Result: " + testcase.getResult());
         System.out.println("Actual Result: " + actualResult);
     }
 
@@ -97,20 +103,40 @@ public class SeeingAITest {
         }
     }
 	
-	private static List<String> readExpectedResultsFromFile() {
-        List<String> expectedResults = new ArrayList<>();
+	private static List<TestCase> readTestCasesFromFile() {
+		ObjectMapper objectMapper = new ObjectMapper();
+        List<TestCase> testCases = new ArrayList<>();
+
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("expected.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                expectedResults.add(line.trim());
+            // Read JSON file
+            JsonNode jsonNode = objectMapper.readTree(new File("expected_outputs.json"));
+
+            JsonNode testCasesNode = jsonNode.get("test_cases");
+
+            for (JsonNode testCaseNode : testCasesNode) {
+                TestCase testCase = objectMapper.treeToValue(testCaseNode, TestCase.class);
+                testCases.add(testCase);
             }
-            reader.close();
+
+            // Print the test cases
+            for (TestCase testCase : testCases) {
+                System.out.println(testCase);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return expectedResults;
+        return testCases;
     }
+	
+	private static void writeTestCasesToFile(List<TestCase> testCases) {
+		ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            objectMapper.writeValue(new File("actual_outputs.json"), testCases);
+            System.out.println("Test cases have been written to actual_outputs.json successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+	}
 	
 	private static void skipButton(WebDriverWait wait) {
         WebElement skipButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("com.microsoft.seeingai:id/pagedSkipButton")));
