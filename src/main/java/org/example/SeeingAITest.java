@@ -22,19 +22,93 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+
+class PassFail {
+    private float pass;
+    private float fail;
+
+    public PassFail(float pass, float fail) {
+        this.pass = pass;
+        this.fail = fail;
+    }
+
+    public float getPass() {
+        return pass;
+    }
+
+    public void setPass(float pass) {
+        this.pass = pass;
+    }
+
+    public float getFail() {
+        return fail;
+    }
+
+    public void setFail(float fail) {
+        this.fail = fail;
+    }
+
+    @Override
+    public String toString() {
+        return "(Pass: " + pass + ", Fail: " + fail + ")";
+    }
+}
+
 
 public class SeeingAITest {
 	public static AppiumDriver driver;
-    public static int totalTests = 29;
+    public static int totalTests = 5;
     public static int passCount = 0;
+    public static int failCount = 0;
+    public static List<String> objectList = new ArrayList<>();
+    public static Map<String, PassFail> scenarioMap = new HashMap<>();
 
 	public static void main(String[] args) {
 		appiumTest();
 		double passRate = (double) passCount / totalTests * 100;
-        System.out.println("Test Pass: " + passCount + "/" + totalTests );
+		
+		System.out.println("");
+        System.out.println("XXXXXXXXXXXXXXXXXXX");
+        System.out.println("");
+		System.out.println("Test Statistics -----------------------------");
+        System.out.println("Pass: " + passCount + " | Fail: " + failCount  + " | Total: " + totalTests );
         System.out.println("Pass %: " + passRate + "%");
+        System.out.println("");
+        System.out.println("XXXXXXXXXXXXXXXXXXX");
+        System.out.println("");
+        System.out.println("Test Coverage -----------------------------");
+        for(String object : objectList)
+        {
+        	System.out.print(object + " | ");
+        }
+        System.out.println("\n");
+        System.out.println("XXXXXXXXXXXXXXXXXXX");
+        System.out.println("");
+        System.out.println("Test Quality Assurance Criteria -----------------------------");
+        System.out.println("A test is considered to be passed if the actual output given by the application has a"
+        		+ " substring\n of the expected output that is given in the expected_outputs.json file.\n If this cindition"
+        		+ " is not satisfied the test is considered to fail");
+        System.out.println("");
+        System.out.println("XXXXXXXXXXXXXXXXXXX");
+        System.out.println("");
+        System.out.println("Test Summary -----------------------------");
+        System.out.println("The script ran tests for total "+totalTests+" test cases out of which "+ passRate+"% passed");
+        System.out.println("The summary for various scenarios is listed below:");
+        for (String key : scenarioMap.keySet()) {
+            PassFail value = scenarioMap.get(key);
+            float passPercent = (value.getPass()/( value.getPass() + value.getFail() )) * 100;
+            float failPercent = (value.getFail()/( value.getPass() + value.getFail() )) * 100;
+            // Do something with key and value
+            System.out.println("Scenario: " + key + " | Pass%:  " + passPercent + " | Fail%:  " + failPercent + " | Total:  " + (value.getPass() + value.getFail()) );
+            System.out.println("");
+        }
+        
 	}
 	
 	public static void appiumTest() {
@@ -65,9 +139,10 @@ public class SeeingAITest {
                 sharePhoto(wait);
                 TestCase testcase = testCases.get(i);
                 getResults(wait, testcase);
-                compareResults(testcase.getResult());
+                compareResults(testcase.getResult(), testcase.getScenario());
                 goBack(wait);
                 swipeToNextImage();
+                objectList.add(testcase.getResult());
             }
             
             navigateToHome();
@@ -88,18 +163,22 @@ public class SeeingAITest {
         System.out.println("Actual Result: " + actualResult);
     }
 
-    private static void compareResults(String expectedResult) {
+    private static void compareResults(String expectedResult, String scenario) {
         WebElement element = driver.findElement(By.id("com.microsoft.seeingai:id/result_cell_text"));
         String actualResult = element.getText().toLowerCase();
         boolean pass = true;
         if (!actualResult.contains(expectedResult)) {
             pass = false;
         }
+        PassFail obj = scenarioMap.get(scenario);
         if (pass) {
             passCount++;
             System.out.println("Pass");
+            obj.setPass(obj.getPass()+1);
         } else {
+        	failCount++;
             System.out.println("Fail");
+            obj.setFail(obj.getFail()+1);
         }
     }
 	
@@ -116,6 +195,10 @@ public class SeeingAITest {
             for (JsonNode testCaseNode : testCasesNode) {
                 TestCase testCase = objectMapper.treeToValue(testCaseNode, TestCase.class);
                 testCases.add(testCase);
+                if(!scenarioMap.containsKey(testCase.getScenario()))
+                {
+                	scenarioMap.put(testCase.getScenario(), new PassFail(0,0));
+                }
             }
 
             // Print the test cases
@@ -130,6 +213,7 @@ public class SeeingAITest {
 	
 	private static void writeTestCasesToFile(List<TestCase> testCases) {
 		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.enable(SerializationFeature.INDENT_OUTPUT); // Enable pretty printing
         try {
             objectMapper.writeValue(new File("actual_outputs.json"), testCases);
             System.out.println("Test cases have been written to actual_outputs.json successfully.");
