@@ -63,7 +63,7 @@ class PassFail {
 
 public class SeeingAITest {
 	public static AppiumDriver driver;
-    public static int totalTests = 5;
+    public static int totalTests = 29;
     public static int passCount = 0;
     public static int failCount = 0;
     public static List<String> objectList = new ArrayList<>();
