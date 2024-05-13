@@ -5,15 +5,17 @@ public class TestCase {
     private String result;
     private String scenario;
     private String actualResult;
+    private String status;
 
     public TestCase() {
     }
 
-    public TestCase(String test_number, String result, String scenario, String actualResult) {
+    public TestCase(String test_number, String result, String scenario, String actualResult, String status) {
         this.test_number = test_number;
         this.result = result;
         this.scenario = scenario;
         this.actualResult = actualResult;
+        this.status = status;
     }
     
     public String getTest_number() {
@@ -46,6 +48,14 @@ public class TestCase {
 
     public void setActualResult(String actualResult) {
         this.actualResult = actualResult;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override

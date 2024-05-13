@@ -23,7 +23,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -66,7 +69,7 @@ public class SeeingAITest {
     public static int totalTests = 29;
     public static int passCount = 0;
     public static int failCount = 0;
-    public static List<String> objectList = new ArrayList<>();
+    public static Set<String> objectSet = new HashSet<>();
     public static Map<String, PassFail> scenarioMap = new HashMap<>();
 
 	public static void main(String[] args) {
@@ -83,7 +86,7 @@ public class SeeingAITest {
         System.out.println("XXXXXXXXXXXXXXXXXXX");
         System.out.println("");
         System.out.println("Test Coverage -----------------------------");
-        for(String object : objectList)
+        for(String object : objectSet)
         {
         	System.out.print(object + " | ");
         }
@@ -139,10 +142,10 @@ public class SeeingAITest {
                 sharePhoto(wait);
                 TestCase testcase = testCases.get(i);
                 getResults(wait, testcase);
-                compareResults(testcase.getResult(), testcase.getScenario());
+                testcase.setStatus(compareResults(testcase.getResult(), testcase.getScenario()));
                 goBack(wait);
                 swipeToNextImage();
-                objectList.add(testcase.getResult());
+                objectSet.add(testcase.getResult());
             }
             
             navigateToHome();
@@ -163,7 +166,7 @@ public class SeeingAITest {
         System.out.println("Actual Result: " + actualResult);
     }
 
-    private static void compareResults(String expectedResult, String scenario) {
+    private static String compareResults(String expectedResult, String scenario) {
         WebElement element = driver.findElement(By.id("com.microsoft.seeingai:id/result_cell_text"));
         String actualResult = element.getText().toLowerCase();
         boolean pass = true;
@@ -175,10 +178,12 @@ public class SeeingAITest {
             passCount++;
             System.out.println("Pass");
             obj.setPass(obj.getPass()+1);
+            return "Pass";
         } else {
         	failCount++;
             System.out.println("Fail");
             obj.setFail(obj.getFail()+1);
+            return "Fail";
         }
     }
 	
