@@ -131,4 +131,4 @@ Scenario: Material Metal | Pass%:  50.0 | Fail%:  50.0 | Total:  2.0
 
 # Script video demo
 
-Video Link: https://drive.google.com/file/d/1EM7NWKahXYODYIOR0ngYjVOd54CGjxJE/view?usp=sharing
+Video Link: https://drive.google.com/file/d/1oJP5woiMD8fynyHWJiDf7-rYjvIMWSeQ/view?usp=sharing
