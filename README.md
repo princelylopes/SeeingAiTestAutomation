@@ -21,13 +21,15 @@ The script runs some automated test cases using appium and java on a android dev
             "test_number": "01",
             "result": "water bottle",
             "scenario": "Dark Lighting",
-            "actualResult": ""
+            "actualResult": "",
+            "status": ""
         },
         {
             "test_number": "02",
             "result": "bean bag",
             "scenario": "Dark Lighting",
-            "actualResult": ""
+            "actualResult": "",
+            "status": ""
         },
         ...
     ]
