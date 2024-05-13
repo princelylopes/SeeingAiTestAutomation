@@ -43,16 +43,17 @@ The script runs some automated test cases using appium and java on a android dev
 ```
 [
     {
-        "test_number":"01",
-        "result":"water bottle",
-        "scenario":"Dark Lighting",
-        "actualResult":"A close-up of a water bottle"
-    },
-    {
-        "test_number":"02",
-        "result":"bean bag",
-        "scenario":"Dark Lighting",
-        "actualResult":"A woman lying on a bean bag"
+      "test_number" : "01",
+      "result" : "water bottle",
+      "scenario" : "Dark Lighting",
+      "actualResult" : "A close-up of a water bottle",
+      "status" : "Pass"
+    }, {
+      "test_number" : "02",
+      "result" : "bean bag",
+      "scenario" : "Dark Lighting",
+      "actualResult" : "A woman lying on a bean bag",
+      "status" : "Pass"
     },
     ...
 ]
